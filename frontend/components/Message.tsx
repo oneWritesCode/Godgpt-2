@@ -51,7 +51,6 @@ function PureMessage({
             />
           );
         }
-
         if (type === 'text') {
           return message.role === 'user' ? (
             <div key={key} className="w-full max-w-[80%]">

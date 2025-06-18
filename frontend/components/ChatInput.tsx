@@ -681,7 +681,15 @@ const PureChatModelDropdown = () => {
                 key={model}
                 onSelect={() => isEnabled && setModel(model)}
                 disabled={!isEnabled}
-                className="flex items-center justify-between gap-2"
+                    className={cn(
+                  'flex items-center justify-between gap-2',
+                  'cursor-pointer',
+                  !isEnabled && [
+                    'cursor-not-allowed',
+                    'bg-transparent',
+                    'opacity-40'
+                  ]
+                )}
               >
                 <div className="flex items-center gap-2">
                   {getModelIcon(model)}
@@ -699,7 +707,7 @@ const PureChatModelDropdown = () => {
                   </div>
                 </div>
                 {selectedModel === model && (
-                  <Check className="w-4 h-4 text-blue-500" />
+                  <Check className="w-4 h-4 text-green-500" />
                 )}
               </DropdownMenuItem>
             );
@@ -712,18 +720,19 @@ const PureChatModelDropdown = () => {
 
 const ChatModelDropdown = memo(PureChatModelDropdown);
 
-function PureStopButton({ stop }: StopButtonProps) {
+const PureStopButton = ({ stop }: StopButtonProps) => {
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={stop}
       aria-label="Stop generating response"
+      className="h-8 w-8 rounded-full hover:text-white !dark:text-white"
     >
-      <StopIcon size={20} />
+      <StopIcon size={18} />
     </Button>
   );
-}
+};
 
 const StopButton = memo(PureStopButton);
 
@@ -737,7 +746,7 @@ const PureSendButton = ({ onSubmit, disabled, isGeneratingImage, isUploading }: 
   return (
     <Button
       onClick={onSubmit}
-      variant="default"
+      variant="ghost"
       size="icon"
       disabled={disabled}
       aria-label={getLabel()}
