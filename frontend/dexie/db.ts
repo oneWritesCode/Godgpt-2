@@ -84,6 +84,8 @@ export interface Attachment {
   uploadId?: string;
   width?: number;
   height?: number;
+  isPDF?: boolean; // Optional, true if the attachment is a PDF
+  cloudinaryUrl?: string; // Optional, for storing Cloudinary URL
 }
 
 interface DBMessage {

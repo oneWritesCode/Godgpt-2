@@ -27,6 +27,7 @@ import LoginForm from './LoginForm';
 import UsageIndicator from './UsageIndicator';
 import { Attachment } from '../dexie/db';
 import ImprovePromptModal from './ImprovePromptModal';
+import { isVisionModel, supportsTools } from '@/lib/models';
 
 
 
@@ -50,13 +51,67 @@ interface SendButtonProps {
   isUploading?: boolean;
 }
 
-const createUserMessage = (id: string, text: string, attachments?: Attachment[]): UIMessage => ({
-  id,
-  parts: [{ type: 'text', text }],
-  role: 'user',
-  content: text,
-  createdAt: new Date(),
-});
+// In ChatInput.tsx - Fix message creation
+function getMimeType(url: string): string {
+  if (url.endsWith('.png')) return 'image/png';
+  if (url.endsWith('.jpg') || url.endsWith('.jpeg')) return 'image/jpeg';
+  if (url.endsWith('.webp')) return 'image/webp';
+  return 'application/octet-stream';
+}
+
+// Updated createUserMessage for vision messages
+const createUserMessage = (
+  id: string,
+  text: string,
+  attachments?: Attachment[]
+): UIMessage => {
+  // If there are image attachments, build message parts as an array.
+  if (
+    attachments &&
+    attachments.length > 0 &&
+    attachments.some((att) => att.type.startsWith('image/'))
+  ) {
+    const parts: any[] = [];
+    // Remove markdown image tokens from the text.
+    const textWithoutImages = text.replace(/!\[[^\]]*\]\([^)]+\)/g, '').trim();
+    if (textWithoutImages) {
+      parts.push({
+        type: 'text',
+        text: textWithoutImages
+      });
+    }
+    // For each image, use exactly the shape expected by OpenRouter:
+    //   type: "image_url" and nested object { url: <the URL> }
+    attachments.forEach((att) => {
+      if (att.type.startsWith('image/')) {
+        parts.push({
+          type: 'image_url',
+          image_url: {
+            url: att.url
+          }
+        });
+      }
+    });
+    return {
+      id,
+      role: 'user',
+      parts, // This array will be sent as the message content.
+      // IMPORTANT: For vision messages, we override 'content'
+      // with the parts array (cast to any here—our UIMessage interface may expect a string,
+      // but the SDK uses the "parts" field if available)
+      content: parts as unknown as string,
+      createdAt: new Date(),
+    };
+  }
+  // Otherwise, create a plain text message.
+  return {
+    id,
+    role: 'user',
+    parts: [{ type: 'text', text }],
+    content: text,
+    createdAt: new Date(),
+  };
+};
 
 const createImageMessage = (id: string, imageUrl: string, prompt: string): UIMessage => ({
   id,
@@ -82,6 +137,8 @@ function PureChatInput({
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isImprovePromptOpen, setIsImprovePromptOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isVision = isVisionModel(selectedModel);
+  const hasImageAttachments = attachments.some(att => att.type.startsWith('image/'));
 
   const modelConfig = getModelConfig(selectedModel);
   const hasUserKey = !!getKey(modelConfig.provider);
@@ -98,10 +155,31 @@ function PureChatInput({
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const isDisabled = useMemo(
-    () => (!input.trim() && attachments.length === 0) || status === 'streaming' || status === 'submitted' || isGeneratingImage || isUploading,
-    [input, attachments.length, status, isGeneratingImage, isUploading]
-  );
+    const isImageGenerationAvailable = useMemo(() => {
+    if (!isImageModel(selectedModel)) return true; // Not an image model
+    
+    const modelConfig = getModelConfig(selectedModel);
+    const hasUserKey = !!getKey(modelConfig.provider);
+    
+    // Free models can use server key, premium models need user key
+    return modelConfig.isFree || hasUserKey;
+  }, [selectedModel, getKey]);
+
+ const isDisabled = useMemo(
+  () => {
+    const basicDisabled = (!input.trim() && attachments.length === 0) || 
+                         status === 'streaming' || 
+                         status === 'submitted' || 
+                         isGeneratingImage || 
+                         isUploading;
+    
+    // Also disable if image model is selected but not available
+    const imageModelUnavailable = isImageModel(selectedModel) && !isImageGenerationAvailable;
+    
+    return basicDisabled || imageModelUnavailable;
+  },
+  [input, attachments.length, status, isGeneratingImage, isUploading, selectedModel, isImageGenerationAvailable]
+);
 
   const { complete } = useMessageSummary();
 
@@ -148,16 +226,20 @@ function PureChatInput({
     }
   }, []);
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
+const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    // Show vision hint for image files
+    if (file.type.startsWith('image/') && isVision) {
+      toast.success(`Image uploaded! You can now ask ${selectedModel} to analyze it.`);
     }
-    // Clear the input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }, [handleFileUpload]);
+    handleFileUpload(file);
+  }
+  // Clear the input
+  if (fileInputRef.current) {
+    fileInputRef.current.value = '';
+  }
+}, [handleFileUpload, isVision, selectedModel]);
 
   const removeAttachment = useCallback((index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
@@ -220,23 +302,62 @@ function PureChatInput({
     }
   }, [selectedModel, threadId, append]);
 
-  const formatMessageContent = useCallback((text: string, attachments: Attachment[]) => {
-    let content = text.trim();
+  // Update the formatMessageContent function
+const formatMessageContent = useCallback((text: string, attachments: Attachment[]) => {
+  let content = text.trim();
+  
+  if (attachments.length > 0) {
+    const attachmentText = attachments.map(att => {
+      if (att.type.startsWith('image/')) {
+        return `![${att.name}](${att.url})`;
+      } else if (att.type === 'application/pdf') {
+        return `📎 [${att.name}](${att.url})`;
+      } else {
+        return `📎 [${att.name}](${att.url})`;
+      }
+    }).join('\n');
     
-    if (attachments.length > 0) {
-      const attachmentText = attachments.map(att => {
-        if (att.type.startsWith('image/')) {
-          return `![${att.name}](${att.url})`;
-        } else {
-          return `📎 [${att.name}](${att.url})`;
-        }
-      }).join('\n');
-      
-      content = content ? `${content}\n\n${attachmentText}` : attachmentText;
-    }
-    
-    return content;
-  }, []);
+    content = content ? `${content}\n\n${attachmentText}` : attachmentText;
+  }
+  
+  return content;
+}, []);
+
+// Update file input to accept PDFs
+<input
+  ref={fileInputRef}
+  type="file"
+  onChange={handleFileSelect}
+  accept="image/*,.pdf,.txt,.md,.doc,.docx"
+  className="hidden"
+/>
+
+// Update the attachment preview
+const getAttachmentPreview = (attachment: Attachment) => {
+  if (attachment.type.startsWith('image/')) {
+    return (
+      <img
+        src={attachment.url}
+        alt={attachment.name}
+        className="w-12 h-12 object-cover rounded"
+        loading="lazy"
+      />
+    );
+  } else if (attachment.type === 'application/pdf') {
+    return (
+      <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded flex items-center justify-center text-lg">
+        📄
+      </div>
+    );
+  } else {
+    return (
+      <div className="w-12 h-12 bg-muted rounded flex items-center justify-center text-lg">
+        📄
+      </div>
+    );
+  }
+};
+
 
   const handleSubmit = useCallback(async () => {
     const currentInput = textareaRef.current?.value || input;
@@ -249,6 +370,17 @@ function PureChatInput({
       isUploading
     )
       return;
+
+    if (isImageModel(selectedModel) && !isImageGenerationAvailable) {
+    toast.error(`${selectedModel} requires your own API key. Please add it in Settings.`);
+    return;
+    }
+
+    // Vision model validation
+  if (isVision && hasImageAttachments && !canChat) {
+    toast.error(`${selectedModel} requires your own API key for image analysis. Please add it in Settings.`);
+    return;
+  }
 
     const messageId = uuidv4();
     const content = formatMessageContent(currentInput, attachments);
@@ -303,6 +435,7 @@ function PureChatInput({
     status,
     isGeneratingImage,
     isUploading,
+    isVision,
     setInput,
     adjustHeight,
     append,
@@ -314,6 +447,7 @@ function PureChatInput({
     handleImageGeneration,
     navigate,
     formatMessageContent,
+    isImageGenerationAvailable,
   ]);
 
   const handleImprovePrompt = useCallback(() => {
@@ -341,23 +475,21 @@ function PureChatInput({
     adjustHeight();
   };
 
-  const getAttachmentPreview = (attachment: Attachment) => {
-    if (attachment.type.startsWith('image/')) {
-      return (
-        <img
-          src={attachment.url}
-          alt={attachment.name}
-          className="w-12 h-12 object-cover rounded"
-          loading="lazy"
-        />
-      );
-    } else {
-      return (
-        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center text-lg">
-          📄
-        </div>
-      );
+
+    const getPlaceholder = () => {
+    if (isImageModel(selectedModel)) {
+      return "Describe the image you want to generate...";
     }
+    if (isVision && hasImageAttachments) {
+      return "Ask me anything about your images...";
+    }
+    if (isVision) {
+      return "Upload an image and ask me to analyze it...";
+    }
+    if (attachments.length > 0) {
+      return "Add a message about your attachments...";
+    }
+    return "What can I do for you?";
   };
 
   return (
@@ -403,13 +535,7 @@ function PureChatInput({
                 <Textarea
                   id="chat-input"
                   value={input}
-                  placeholder={
-                    isImageModel(selectedModel) 
-                      ? "Describe the image you want to generate..." 
-                      : attachments.length > 0 
-                        ? "Add a message about your attachments..."
-                        : "What can I do for you?"
-                  }
+                  placeholder={getPlaceholder()}
                   className={cn(
                     'w-full px-4 py-3 border-none shadow-none dark:bg-transparent',
                     'placeholder:text-muted-foreground resize-none',
@@ -514,6 +640,13 @@ const PureChatModelDropdown = () => {
     [getKey]
   );
 
+  const getModelIcon = (model: AIModel) => {
+    if (isImageModel(model)) return <ImageIcon className="w-3 h-3" />;
+    if (isVisionModel(model)) return <span className="text-xs">👁️</span>;
+    if (supportsTools(model)) return <span className="text-xs">🔧</span>;
+    return null;
+  };
+
   return (
     <div className="flex items-center gap-2">
       <UsageIndicator />
@@ -524,13 +657,13 @@ const PureChatModelDropdown = () => {
             className="flex items-center gap-1 h-8 pl-2 pr-2 text-xs rounded-md"
           >
             <div className="flex items-center gap-1">
-              {isImageModel(selectedModel) && <ImageIcon className="w-3 h-3" />}
+              {getModelIcon(selectedModel)}
               {selectedModel}
-              {isFreeModel(selectedModel) && (
+              {/* {isFreeModel(selectedModel) && (
                 <Badge className="text-xs px-1 py-0">
                   Free
                 </Badge>
-              )}
+              )} */}
               <ChevronDown className="w-3 h-3 opacity-50" />
             </div>
           </Button>
@@ -540,6 +673,8 @@ const PureChatModelDropdown = () => {
             const isEnabled = isModelEnabled(model);
             const isFree = isFreeModel(model);
             const isImage = isImageModel(model);
+            const isVision = isVisionModel(model);
+            const hasTools = supportsTools(model);
             
             return (
               <DropdownMenuItem
@@ -549,13 +684,19 @@ const PureChatModelDropdown = () => {
                 className="flex items-center justify-between gap-2"
               >
                 <div className="flex items-center gap-2">
-                  {isImage && <ImageIcon className="w-4 h-4" />}
+                  {getModelIcon(model)}
                   <span>{model}</span>
-                  {isFree && (
-                    <Badge className="text-xs">
-                      Free
-                    </Badge>
-                  )}
+                  <div className="flex gap-1">
+                    {isFree && (
+                      <Badge className="text-xs">Free</Badge>
+                    )}
+                    {isVision && (
+                      <Badge className="text-xs">Vision</Badge>
+                    )}
+                    {hasTools && (
+                      <Badge className="text-xs">Tools</Badge>
+                    )}
+                  </div>
                 </div>
                 {selectedModel === model && (
                   <Check className="w-4 h-4 text-blue-500" />

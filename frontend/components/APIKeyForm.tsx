@@ -97,8 +97,8 @@ const Form = () => {
       <ApiKeyField
         id="openai"
         label="OpenAI API Key"
-        models={['GPT-4o', 'GPT-4.1-mini']}
-        linkUrl="https://platform.openai.com/settings/organization/api-keys"
+        models={['GPT-4o', 'GPT-4o Mini', 'GPT-4V (Vision)', 'DALL-E 3', 'DALL-E 2']}
+        linkUrl="https://platform.openai.com/api-keys"
         placeholder="sk-..."
         register={register}
         error={errors.openai}

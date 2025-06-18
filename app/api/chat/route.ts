@@ -85,7 +85,10 @@ export async function POST(req: NextRequest) {
 
       case 'openai':
         const { createOpenAI } = await import('@ai-sdk/openai');
-        const openai = createOpenAI({ apiKey });
+        const openai = createOpenAI({ 
+          apiKey,
+          baseURL: 'https://api.openai.com/v1' // Ensure correct base URL
+        });
         aiModel = openai(modelConfig.modelId);
         break;
 

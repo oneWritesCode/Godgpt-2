@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const DAILY_LIMIT = 10;
+const DAILY_LIMIT = 15;
 
 export async function checkAndUpdateUsage(userId: string): Promise<{
   canMakeRequest: boolean;
