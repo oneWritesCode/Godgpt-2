@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { getUserUsage } from '@/lib/usage';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
+
   try {
     const headersList = await headers();
     // const cookieStore = await cookies();

@@ -12,10 +12,20 @@ cloudinary.config({
 
 export const maxDuration = 60;
 
+// Define the Cloudinary upload result type
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  width?: number;
+  height?: number;
+  resource_type: string;
+  format: string;
+  bytes: number;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const headersList = await headers();
-
     // Get session from Better Auth
     const session = await auth.api.getSession({
       headers: headersList,
@@ -43,7 +53,7 @@ export async function POST(req: NextRequest) {
     // Validate file type
     const allowedTypes = [
       'image/jpeg',
-      'image/png', 
+      'image/png',
       'image/gif',
       'image/webp',
       'image/svg+xml',
@@ -77,7 +87,7 @@ export async function POST(req: NextRequest) {
     console.log('Uploading to Cloudinary...');
 
     // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+    const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
           resource_type: 'auto', // Automatically detect file type
@@ -94,29 +104,28 @@ export async function POST(req: NextRequest) {
           if (error) {
             console.error('Cloudinary upload error:', error);
             reject(error);
+          } else if (result) {
+            console.log('Cloudinary upload success:', result.public_id);
+            resolve(result as CloudinaryUploadResult);
           } else {
-            console.log('Cloudinary upload success:', result?.public_id);
-            resolve(result);
+            reject(new Error('Upload failed - no result returned'));
           }
         }
       ).end(buffer);
     });
 
-    const uploadResult = result as any;
-
     const response = {
-      url: uploadResult.secure_url,
+      url: result.secure_url,
       name: file.name,
       size: file.size,
       type: file.type,
-      uploadId: uploadResult.public_id,
-      width: uploadResult.width,
-      height: uploadResult.height,
+      uploadId: result.public_id,
+      width: result.width,
+      height: result.height,
     };
 
     console.log('Upload successful:', response.url);
     console.log('response:', response);
-
     return NextResponse.json(response);
 
   } catch (error) {

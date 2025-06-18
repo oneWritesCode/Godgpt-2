@@ -24,7 +24,10 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
   trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
   callbacks: {
-    async signIn({ user, account }: { user: any; account: any }) {
+    async signIn({ user, account }: { 
+      user: { id: string; email: string; name?: string }; 
+      account?: { provider?: string } 
+    }) {
       console.log('Sign in callback:', { userId: user.id, provider: account?.provider });
       
       try {
