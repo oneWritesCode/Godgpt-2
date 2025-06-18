@@ -143,6 +143,7 @@ import { Button } from './ui/button';
 import { MessageSquareMore } from 'lucide-react';
 import { useChatNavigator } from '@/frontend/hooks/useChatNavigator';
 import Messages from './Messages';
+import LandingChatPage from './LandingChatPage';
 
 interface ChatProps {
   threadId: string;
@@ -203,9 +204,10 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
     <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800">
       <ChatSidebarTrigger />
       <main
-      className={`flex flex-col w-full max-w-3xl pt-12 text-[1rem] lg:text-[0.9rem] sm:text-[0.8rem] pb-44 mx-auto transition-all duration-300 ease-in-out`}
+  className={`flex flex-col w-full max-w-3xl pt-10 pb-44 lg:mx-auto transition-all duration-300 ease-in-out`}
+
       >
-      <div className="flex translate-x-3 px-4">
+      
         {messages.length === 0 ? (
           <LandingChatPage/>
         ) : (
@@ -220,7 +222,7 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
             stop={stop}
             />
           )}
-          </div>
+        
         <ChatInput
           threadId={threadId}
           input={input}
