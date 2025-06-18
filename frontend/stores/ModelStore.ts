@@ -30,7 +30,7 @@ export const withStorageDOMEvents = (store: StoreWithPersist) => {
 export const useModelStore = create<ModelStore>()(
   persist(
     (set, get) => ({
-      selectedModel: 'Gemini 2.5 Flash',
+      selectedModel: 'Deepseek R1 0528', // Default model
 
       setModel: (model) => {
         set({ selectedModel: model });

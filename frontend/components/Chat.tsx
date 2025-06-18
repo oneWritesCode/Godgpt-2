@@ -131,7 +131,6 @@
 
 
 import { useChat } from '@ai-sdk/react';
-import VirtualizedMessages from './VirtualizedMessages';
 import ChatInput from './ChatInput';
 import ChatNavigator from './ChatNavigator';
 import { UIMessage } from 'ai';

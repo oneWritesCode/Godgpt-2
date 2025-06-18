@@ -1,4 +1,4 @@
-import { db } from './db';
+import { Attachment, db } from './db';
 import { UIMessage } from 'ai';
 import { v4 as uuidv4 } from 'uuid';
 import Dexie from 'dexie';
@@ -55,7 +55,7 @@ export const getMessagesByThreadId = async (threadId: string) => {
     .toArray();
 };
 
-export const createMessage = async (threadId: string, message: UIMessage) => {
+export const createMessage = async (threadId: string, message: UIMessage, attachments?: Attachment[]) => {
   return await db.transaction('rw', [db.messages, db.threads], async () => {
     await db.messages.add({
       id: message.id,
@@ -64,6 +64,7 @@ export const createMessage = async (threadId: string, message: UIMessage) => {
       role: message.role,
       content: message.content,
       createdAt: message.createdAt || new Date(),
+      attachments: attachments || [],
     });
 
     await db.threads.update(threadId, {
