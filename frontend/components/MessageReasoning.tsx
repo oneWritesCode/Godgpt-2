@@ -30,7 +30,7 @@ function PureMessageReasoning({
       </button>
       {isExpanded && (
         <div className="p-4 rounded-md bg-secondary/10 text-xs border">
-          <MemoizedMarkdown content={reasoning} id={id} size="small" />
+          <MemoizedMarkdown content={reasoning} id={id} />
         </div>
       )}
     </div>
