@@ -48,12 +48,14 @@ function PureMessage({
             />
           );
         }
-
         if (type === 'text') {
           return message.role === 'user' ? (
             <div
               key={key}
-              className="relative group px-4 py-3 rounded-xl bg-secondary border border-secondary-foreground/2 max-w-[80%]"
+              className={cn(
+                "relative group px-2 py-0.5 rounded-sm max-w-[80%]",
+                mode === "view" ? "bg-secondary border border-secondary-foreground/2" : ""
+              )}
               ref={(el) => registerRef(message.id, el)}
             >
               {mode === 'edit' && (
@@ -82,8 +84,10 @@ function PureMessage({
               )}
             </div>
           ) : (
-            <div key={key} className="group flex flex-col gap-2 w-full">
-              <MarkdownRenderer content={part.text} id={message.id} />
+            <div key={key} className="group flex flex-col w-full">
+              <div className="text-[1rem] lg:text-rem] sm:text[1rem] text-base/8 font-light ">
+                <MarkdownRenderer content={part.text} id={message.id} />
+              </div>
               {!isStreaming && (
                 <MessageControls
                   threadId={threadId}

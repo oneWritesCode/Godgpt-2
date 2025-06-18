@@ -1,7 +1,6 @@
 import { useChat } from '@ai-sdk/react';
 import Messages from './Messages';
 import ChatInput from './ChatInput';
-import ChatNavigator from './ChatNavigator';
 import { UIMessage } from 'ai';
 import { v4 as uuidv4 } from 'uuid';
 import { createMessage } from '@/frontend/dexie/queries';
@@ -12,6 +11,7 @@ import { SidebarTrigger, useSidebar } from './ui/sidebar';
 import { Button } from './ui/button';
 import { MessageSquareMore } from 'lucide-react';
 import { useChatNavigator } from '@/frontend/hooks/useChatNavigator';
+import LandingChatPage from './LandingChatPage';
 
 interface ChatProps {
   threadId: string;
@@ -69,21 +69,27 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
   });
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800">
       <ChatSidebarTrigger />
       <main
-        className={`flex flex-col w-full max-w-3xl pt-10 pb-44 mx-auto transition-all duration-300 ease-in-out`}
+      className={`flex flex-col w-full max-w-3xl pt-12 text-[1rem] lg:text-[0.9rem] sm:text-[0.8rem] pb-44 mx-auto transition-all duration-300 ease-in-out`}
       >
-        <Messages
-          threadId={threadId}
-          messages={messages}
-          status={status}
-          setMessages={setMessages}
-          reload={reload}
-          error={error}
-          registerRef={registerRef}
-          stop={stop}
-        />
+      <div className="flex translate-x-3 px-4">
+        {messages.length === 0 ? (
+          <LandingChatPage/>
+        ) : (
+          <Messages
+            threadId={threadId}
+            messages={messages}
+            status={status}
+            setMessages={setMessages}
+            reload={reload}
+            error={error}
+            registerRef={registerRef}
+            stop={stop}
+            />
+          )}
+          </div>
         <ChatInput
           threadId={threadId}
           input={input}
@@ -94,26 +100,6 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
         />
       </main>
       <ThemeToggler />
-      <Button
-        onClick={handleToggleNavigator}
-        variant="outline"
-        size="icon"
-        className="fixed right-16 top-4 z-20"
-        aria-label={
-          isNavigatorVisible
-            ? 'Hide message navigator'
-            : 'Show message navigator'
-        }
-      >
-        <MessageSquareMore className="h-5 w-5" />
-      </Button>
-
-      <ChatNavigator
-        threadId={threadId}
-        scrollToMessage={scrollToMessage}
-        isVisible={isNavigatorVisible}
-        onClose={closeNavigator}
-      />
     </div>
   );
 }

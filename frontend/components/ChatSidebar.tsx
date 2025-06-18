@@ -13,7 +13,7 @@ import { Button, buttonVariants } from './ui/button';
 import { deleteThread, getThreads } from '@/frontend/dexie/queries';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link, useNavigate, useParams } from 'react-router';
-import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { memo } from 'react';
 import UserProfile from './UserProfile';
@@ -26,7 +26,7 @@ export default function ChatSidebar() {
 
   return (
     <Sidebar>
-      <div className="flex flex-col h-full p-2">
+      <div className="flex flex-col h-full p-2 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
         <Header />
         <SidebarContent className="no-scrollbar">
           <SidebarGroup>
@@ -37,8 +37,8 @@ export default function ChatSidebar() {
                     <SidebarMenuItem key={thread.id}>
                       <div
                         className={cn(
-                          'cursor-pointer group/thread h-9 flex items-center px-2 py-1 rounded-[8px] overflow-hidden w-full hover:bg-secondary',
-                          id === thread.id && 'bg-secondary'
+                          'cursor-pointer group/thread h-9 flex items-center px-2 py-1 rounded-[8px] overflow-hidden w-full hover:bg-white/50 dark:hover:bg-gray-800/50',
+                          id === thread.id && 'bg-white/50 dark:bg-gray-800/50'
                         )}
                         onClick={() => {
                           if (id === thread.id) {
@@ -47,19 +47,19 @@ export default function ChatSidebar() {
                           navigate(`/chat/${thread.id}`);
                         }}
                       >
-                        <span className="truncate block">{thread.title}</span>
+                        <span className="truncate block text-gray-800 dark:text-gray-100">{thread.title}</span>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="hidden group-hover/thread:flex ml-auto h-7 w-7"
+                          className="hidden group-hover/thread:flex hover:text-red-600 ml-auto h-7 w-7"
                           onClick={async (event) => {
                             event.preventDefault();
                             event.stopPropagation();
                             await deleteThread(thread.id);
                             navigate(`/chat`);
                           }}
-                        >
-                          <X size={16} />
+                        > 
+                           <Trash2 size={16} />
                         </Button>
                       </div>
                     </SidebarMenuItem>
@@ -97,23 +97,7 @@ function PureHeader() {
 
 const Header = memo(PureHeader);
 
-// const PureFooter = () => {
-//   const { id: chatId } = useParams();
 
-//   return (
-//     <SidebarFooter>
-//       <Link
-//         to={{
-//           pathname: "/settings",
-//           search: chatId ? `?from=${encodeURIComponent(chatId)}` : "",
-//         }}
-//         className={buttonVariants({ variant: "outline" })}
-//       >
-//         Settings
-//       </Link>
-//     </SidebarFooter>
-//   );
-// };
 
 
 // Replace the Footer component

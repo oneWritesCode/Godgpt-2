@@ -88,127 +88,61 @@ function PureChatInput({
 
   const { complete } = useMessageSummary();
 
-  // const handleSubmit = useCallback(async () => {
-  //   const currentInput = textareaRef.current?.value || input;
+  const handleSubmit = useCallback(async () => {
+    const currentInput = textareaRef.current?.value || input;
 
-  //   if (
-  //     !currentInput.trim() ||
-  //     status === 'streaming' ||
-  //     status === 'submitted'
-  //   )
-  //     return;
+    if (
+      !currentInput.trim() ||
+      status === 'streaming' ||
+      status === 'submitted'
+    )
+      return;
 
-  //   const messageId = uuidv4();
+    const messageId = uuidv4();
 
-  //   if (!id) {
-  //     navigate(`/chat/${threadId}`);
-  //     await createThread(threadId);
-  //     complete(currentInput.trim(), {
-  //       body: { threadId, messageId, isTitle: true },
-  //     });
-  //   } else {
-  //     complete(currentInput.trim(), { body: { messageId, threadId } });
-  //   }
+    if (!id) {
+      navigate(`/chat/${threadId}`);
+      await createThread(threadId);
+      complete(currentInput.trim(), {
+        body: {
+          threadId,
+          messageId,
+          isTitle: true,
+          selectedModel
+        },
+      });
+    } else {
+      complete(currentInput.trim(), {
+        body: {
+          messageId,
+          threadId,
+          selectedModel
+        }
+      });
+    }
 
-  //   const userMessage = createUserMessage(messageId, currentInput.trim());
-  //   await createMessage(threadId, userMessage);
+    const userMessage = createUserMessage(messageId, currentInput.trim());
+    await createMessage(threadId, userMessage);
 
-  //   append(userMessage);
-  //   setInput('');
-  //   adjustHeight(true);
-  // }, [
-  //   input,
-  //   status,
-  //   setInput,
-  //   adjustHeight,
-  //   append,
-  //   id,
-  //   textareaRef,
-  //   threadId,
-  //   complete,
-  // ]);
-  // Update the handleSubmit function in your ChatInput component
-
-const handleSubmit = useCallback(async () => {
-  const currentInput = textareaRef.current?.value || input;
-
-  if (
-    !currentInput.trim() ||
-    status === 'streaming' ||
-    status === 'submitted'
-  )
-    return;
-
-  const messageId = uuidv4();
-
-  if (!id) {
-    navigate(`/chat/${threadId}`);
-    await createThread(threadId);
-    // Pass the selectedModel to the completion API
-    complete(currentInput.trim(), {
-      body: { 
-        threadId, 
-        messageId, 
-        isTitle: true,
-        selectedModel // Add this line
-      },
-    });
-  } else {
-    // Pass the selectedModel to the completion API
-    complete(currentInput.trim(), { 
-      body: { 
-        messageId, 
-        threadId,
-        selectedModel // Add this line
-      } 
-    });
-  }
-
-  const userMessage = createUserMessage(messageId, currentInput.trim());
-  await createMessage(threadId, userMessage);
-
-  append(userMessage);
-  setInput('');
-  adjustHeight(true);
-}, [
-  input,
-  status,
-  setInput,
-  adjustHeight,
-  append,
-  id,
-  textareaRef,
-  threadId,
-  complete,
-  selectedModel, // Add this dependency
-]);
+    append(userMessage);
+    setInput('');
+    adjustHeight(true);
+  }, [
+    input,
+    status,
+    setInput,
+    adjustHeight,
+    append,
+    id,
+    textareaRef,
+    threadId,
+    complete,
+    selectedModel,
+  ]);
 
   if (!isAuthenticated) {
     return <LoginForm />;
   }
-
-  // if (!canChat) {
-  //   return (
-  //     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-  //       <div className="flex items-center p-4 pr-5 border rounded-lg bg-background shadow-lg gap-4 max-w-md">
-  //         <div className="bg-primary/10 p-2.5 rounded-full">
-  //           <Key className="h-5 w-5 text-primary" />
-  //         </div>
-  //         <div>
-  //           <p className="text-sm font-medium">Premium model requires API key</p>
-  //           <p className="text-xs text-muted-foreground">
-  //             Add your {modelConfig.provider} API key in Settings
-  //           </p>
-  //         </div>
-  //         <Link to="/settings">
-  //           <Button size="sm" variant="outline" className="ml-2 h-8 text-xs">
-  //             Configure
-  //           </Button>
-  //         </Link>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -223,51 +157,51 @@ const handleSubmit = useCallback(async () => {
   };
 
   return (
-    
-    <div className="fixed bottom-0 w-full max-w-3xl">
-      <div className="bg-secondary rounded-t-[20px] p-2 pb-0 w-full">
-        <div className="relative">
-          <div className="flex flex-col">
-            <div className="bg-secondary overflow-y-auto max-h-[300px]">
-              <Textarea
-                id="chat-input"
-                value={input}
-                placeholder="What can I do for you?"
-                className={cn(
-                  'w-full px-4 py-3 border-none shadow-none dark:bg-transparent',
-                  'placeholder:text-muted-foreground resize-none',
-                  'focus-visible:ring-0 focus-visible:ring-offset-0',
-                  'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/30',
-                  'scrollbar-thumb-rounded-full',
-                  'min-h-[72px]'
-                )}
-                ref={textareaRef}
-                onKeyDown={handleKeyDown}
-                onChange={handleInputChange}
-                aria-label="Chat message input"
-                aria-describedby="chat-input-description"
-              />
-              <span id="chat-input-description" className="sr-only">
-                Press Enter to send, Shift+Enter for new line
-              </span>
-            </div>
+    <div className="fixed bottom-2 lg:left-auto left-0 w-full px-3 pb-3">
+      <div className="max-w-3xl lg:mx-0 mx-auto">
+        <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 rounded-[16px] p-0.5 w-full border-1">
+          <div className="relative">
+            <div className="flex flex-col">
+              <div className="bg-transparent overflow-y-auto max-h-[300px]">
+                <Textarea
+                  id="chat-input"
+                  value={input}
+                  placeholder="What can I do for you?"
+                  className={cn(
+                    'w-full px-4 py-3 border-none shadow-none dark:bg-transparent',
+                    'placeholder:text-muted-foreground resize-none',
+                    'focus-visible:ring-0 focus-visible:ring-offset-0',
+                    'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/30',
+                    'scrollbar-thumb-rounded-full',
+                    'min-h-[72px]'
+                  )}
+                  ref={textareaRef}
+                  onKeyDown={handleKeyDown}
+                  onChange={handleInputChange}
+                  aria-label="Chat message input"
+                  aria-describedby="chat-input-description"
+                />
+                <span id="chat-input-description" className="sr-only">
+                  Press Enter to send, Shift+Enter for new line
+                </span>
+              </div>
 
-            <div className="h-14 flex items-center px-2">
-              <div className="flex items-center justify-between w-full">
-                <ChatModelDropdown />
+              <div className="h-14 flex items-center px-2">
+                <div className="flex items-center justify-between w-full">
+                  <ChatModelDropdown />
 
-                {status === 'submitted' || status === 'streaming' ? (
-                  <StopButton stop={stop} />
-                ) : (
-                  <SendButton onSubmit={handleSubmit} disabled={isDisabled} />
-                )}
+                  {status === 'submitted' || status === 'streaming' ? (
+                    <StopButton stop={stop} />
+                  ) : (
+                    <SendButton onSubmit={handleSubmit} disabled={isDisabled} />
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-            
   );
 }
 
@@ -314,13 +248,21 @@ const PureChatModelDropdown = () => {
           {AI_MODELS.map((model) => {
             const isEnabled = isModelEnabled(model);
             const isFree = isFreeModel(model);
-            
+
             return (
               <DropdownMenuItem
                 key={model}
                 onSelect={() => isEnabled && setModel(model)}
                 disabled={!isEnabled}
-                className="flex items-center justify-between gap-2"
+                    className={cn(
+                  'flex items-center justify-between gap-2',
+                  'cursor-pointer',
+                  !isEnabled && [
+                    'cursor-not-allowed',
+                    'bg-transparent',
+                    'opacity-40'
+                  ]
+                )}
               >
                 <div className="flex items-center gap-2">
                   <span>{model}</span>
@@ -331,7 +273,7 @@ const PureChatModelDropdown = () => {
                   )}
                 </div>
                 {selectedModel === model && (
-                  <Check className="w-4 h-4 text-blue-500" />
+                  <Check className="w-4 h-4 text-green-500" />
                 )}
               </DropdownMenuItem>
             );
@@ -344,18 +286,19 @@ const PureChatModelDropdown = () => {
 
 const ChatModelDropdown = memo(PureChatModelDropdown);
 
-function PureStopButton({ stop }: StopButtonProps) {
+const PureStopButton = ({ stop }: StopButtonProps) => {
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={stop}
       aria-label="Stop generating response"
+      className="h-8 w-8 rounded-full hover:text-white !dark:text-white"
     >
-      <StopIcon size={20} />
+      <StopIcon size={18} />
     </Button>
   );
-}
+};
 
 const StopButton = memo(PureStopButton);
 
@@ -363,9 +306,10 @@ const PureSendButton = ({ onSubmit, disabled }: SendButtonProps) => {
   return (
     <Button
       onClick={onSubmit}
-      variant="default"
+      variant="ghost"
       size="icon"
       disabled={disabled}
+      className="h-8 w-8 rounded-full bg-purple-600 text-white dark:text-white font-bold hover:bg-purple-600 hover:text-white disabled:opacity-70"
       aria-label="Send message"
     >
       <ArrowUpIcon size={18} />

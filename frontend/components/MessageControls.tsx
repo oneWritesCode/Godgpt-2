@@ -75,23 +75,23 @@ export default function MessageControls({
   return (
     <div
       className={cn(
-        'opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex gap-1',
+        'opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex pb-1',
         {
-          'absolute mt-5 right-2': message.role === 'user',
+          'absolute mt-1 right-0': message.role === 'user',
         }
       )}
     >
-      <Button variant="ghost" size="icon" onClick={handleCopy}>
-        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      <Button className='h-7 w-7' variant="ghost" size="icon" onClick={handleCopy} title="Copy message">
+        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-3 h-3" />}
       </Button>
       {setMode && hasRequiredKeys && (
-        <Button variant="ghost" size="icon" onClick={() => setMode('edit')}>
-          <SquarePen className="w-4 h-4" />
+        <Button  className='h-7 w-7' variant="ghost" size="icon" onClick={() => setMode('edit')} title="Edit message">
+          <SquarePen className="w-3 h-3"  />
         </Button>
       )}
       {hasRequiredKeys && (
-        <Button variant="ghost" size="icon" onClick={handleRegenerate}>
-          <RefreshCcw className="w-4 h-4" />
+        <Button  className='h-7 w-7' variant="ghost" size="icon" onClick={handleRegenerate} title="Regenerate response">
+          <RefreshCcw className="w-3 h-3" />
         </Button>
       )}
     </div>
