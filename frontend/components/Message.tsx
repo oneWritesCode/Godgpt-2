@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import MarkdownRenderer from '@/frontend/components/MemoizedMarkdown';
+// import MarkdownRenderer from '@/frontend/components/MemoizedMarkdown';
 import { cn } from '@/lib/utils';
 import { UIMessage } from 'ai';
 import equal from 'fast-deep-equal';
@@ -7,6 +7,8 @@ import MessageControls from './MessageControls';
 import { UseChatHelpers } from '@ai-sdk/react';
 import MessageEditor from './MessageEditor';
 import MessageReasoning from './MessageReasoning';
+import MemoizedMarkdown from './MemoizedMarkdown';
+// import StreamingMarkdown from './StreamingMarkdown';
 
 function PureMessage({
   threadId,
@@ -82,8 +84,14 @@ function PureMessage({
               )}
             </div>
           ) : (
-            <div key={key} className="group flex flex-col gap-2 w-full">
-              <MarkdownRenderer content={part.text} id={message.id} />
+            <div key={key} className="group flex flex-col gap-2 w-full max-w-none">
+              <div ref={(el) => registerRef(message.id, el)}>
+                <MemoizedMarkdown
+                  content={part.text} 
+                  id={message.id}
+                  isStreaming={isStreaming}
+                />
+              </div>
               {!isStreaming && (
                 <MessageControls
                   threadId={threadId}

@@ -88,48 +88,7 @@ function PureChatInput({
 
   const { complete } = useMessageSummary();
 
-  // const handleSubmit = useCallback(async () => {
-  //   const currentInput = textareaRef.current?.value || input;
-
-  //   if (
-  //     !currentInput.trim() ||
-  //     status === 'streaming' ||
-  //     status === 'submitted'
-  //   )
-  //     return;
-
-  //   const messageId = uuidv4();
-
-  //   if (!id) {
-  //     navigate(`/chat/${threadId}`);
-  //     await createThread(threadId);
-  //     complete(currentInput.trim(), {
-  //       body: { threadId, messageId, isTitle: true },
-  //     });
-  //   } else {
-  //     complete(currentInput.trim(), { body: { messageId, threadId } });
-  //   }
-
-  //   const userMessage = createUserMessage(messageId, currentInput.trim());
-  //   await createMessage(threadId, userMessage);
-
-  //   append(userMessage);
-  //   setInput('');
-  //   adjustHeight(true);
-  // }, [
-  //   input,
-  //   status,
-  //   setInput,
-  //   adjustHeight,
-  //   append,
-  //   id,
-  //   textareaRef,
-  //   threadId,
-  //   complete,
-  // ]);
-  // Update the handleSubmit function in your ChatInput component
-
-const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async () => {
   const currentInput = textareaRef.current?.value || input;
 
   if (
@@ -187,29 +146,6 @@ const handleSubmit = useCallback(async () => {
     return <LoginForm />;
   }
 
-  // if (!canChat) {
-  //   return (
-  //     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-  //       <div className="flex items-center p-4 pr-5 border rounded-lg bg-background shadow-lg gap-4 max-w-md">
-  //         <div className="bg-primary/10 p-2.5 rounded-full">
-  //           <Key className="h-5 w-5 text-primary" />
-  //         </div>
-  //         <div>
-  //           <p className="text-sm font-medium">Premium model requires API key</p>
-  //           <p className="text-xs text-muted-foreground">
-  //             Add your {modelConfig.provider} API key in Settings
-  //           </p>
-  //         </div>
-  //         <Link to="/settings">
-  //           <Button size="sm" variant="outline" className="ml-2 h-8 text-xs">
-  //             Configure
-  //           </Button>
-  //         </Link>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -224,7 +160,7 @@ const handleSubmit = useCallback(async () => {
 
   return (
     
-    <div className="fixed bottom-0 w-full max-w-3xl">
+    <div className="fixed bottom-0 w-full bg-background/95 max-w-3xl">
       <div className="bg-secondary rounded-t-[20px] p-2 pb-0 w-full">
         <div className="relative">
           <div className="flex flex-col">
