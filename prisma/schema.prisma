@@ -71,12 +71,14 @@ model VerificationToken {
 }
 
 model Usage {
-  id             String    @id @default(cuid())
-  userId         String
-  requestCount   Int       @default(0)
-  firstRequestAt DateTime?
-  resetAt        DateTime?
-  updatedAt      DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  userId            String
+  requestCount      Int       @default(0)
+  premiumCount      Int       @default(0)      
+  firstRequestAt    DateTime?
+  resetAt           DateTime?
+  premiumResetAt    DateTime?                  
+  updatedAt         DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

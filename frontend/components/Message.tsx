@@ -62,7 +62,7 @@ function PureMessage({
                       key={attIndex}
                       className={cn(
                         "relative group px-2 py-0.5 rounded-xl max-w-[80%]",
-                        mode === "view" ? "bg-secondary border border-secondary-foreground/2" : ""
+                        mode === "view" ? "bg-secondary border border-gray-50" : ""
                       )}
                     >
                       {attachment.type.startsWith('image/') ? (
@@ -101,7 +101,7 @@ function PureMessage({
               )}
 
               <div
-                className="relative group px-4 py-3 rounded-xl bg-transparent border border-secondary-foreground/2 text-left"
+                className="relative group px-4 py-3 rounded-xl bg-transparent border text-left"
                 ref={(el) => registerRef(message.id, el)}
               >
                 {mode === 'edit' && (

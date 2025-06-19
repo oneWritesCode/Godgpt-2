@@ -9,6 +9,7 @@ import {
   Sparkles,
   Eye,
   Wrench,
+  Star,
 } from "lucide-react";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Textarea } from "@/frontend/components/ui/textarea";
@@ -883,9 +884,9 @@ const PureChatModelDropdown = () => {
                   {getModelIcon(model)}
                   <span>{model}</span>
                   <div className="flex gap-1">
-                    {isFree && <Badge className="text-xs">Free</Badge>}
-                    {isVision && <Badge className="text-xs">Vision</Badge>}
-                    {hasTools && <Badge className="text-xs">Tools</Badge>}
+                    {isFree && <Star className="w-3 h-3 text-pink-400" />}
+                    {isVision && <Eye className="w-3 h-3 text-blue-400" />}
+                    {hasTools && <Wrench className="w-3 h-3 text-yellow-500" />}
                   </div>
                 </div>
 
