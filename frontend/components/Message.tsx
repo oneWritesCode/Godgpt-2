@@ -101,7 +101,7 @@ function PureMessage({
               )}
 
               <div
-                className="relative group px-4 py-3 rounded-xl bg-transparent border text-left"
+                className="relative group px-4 py-3 rounded-xl bg-[#101828] text-left"
                 ref={(el) => registerRef(message.id, el)}
               >
                 {mode === 'edit' && (
