@@ -60,7 +60,10 @@ function PureMessage({
                   {attachments.map((attachment, attIndex) => (
                     <div
                       key={attIndex}
-                      className="relative group bg-background border border-border rounded-lg overflow-hidden"
+                      className={cn(
+                        "relative group px-2 py-0.5 rounded-xl max-w-[80%]",
+                        mode === "view" ? "bg-secondary border border-secondary-foreground/2" : ""
+                      )}
                     >
                       {attachment.type.startsWith('image/') ? (
                         <img
@@ -98,7 +101,7 @@ function PureMessage({
               )}
 
               <div
-                className="relative group px-4 py-3 rounded-xl bg-secondary border border-secondary-foreground/2"
+                className="relative group px-4 py-3 rounded-xl bg-transparent border border-secondary-foreground/2 text-left"
                 ref={(el) => registerRef(message.id, el)}
               >
                 {mode === 'edit' && (
@@ -112,7 +115,7 @@ function PureMessage({
                     stop={stop}
                   />
                 )}
-                {mode === 'view' && <p>{part.text}</p>}
+                {mode === 'view' && <p className="text-right">{part.text}</p>}
 
                 {mode === 'view' && (
                   <MessageControls

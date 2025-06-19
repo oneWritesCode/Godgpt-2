@@ -20,17 +20,17 @@ export default function DashboardNav({ onSectionChange, currentSection }: Dashbo
   ];
 
   return (
-    <nav className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
+    <nav className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm bg-pink-500/10 p-2 rounded-sm dark:bg-gray-800">
       {sections.map((section) => (
         <button
           key={section.id}
           //there i need to cahge some stylessssss_______________________________________________________________________________________________________________________________
           onClick={() => onSectionChange(section.id)}
           className={cn(
-            "hover:shadow-lg transition-colors px-2 py-1 rounded cursor-pointer shadow-sm font-medium",
+            "hover:shadow-lg transition-colors px-2 py-1 rounded cursor-pointer shadow-sm font-medium bg-white dark:bg-white/10 text-gray-800 dark:text-gray-100",
             currentSection === section.id
-              ? "shadow-lg scale-[1.1] bg-white dark:bg-gray-800"
-              : "bg-white dark:bg-white/10 text-gray-800 dark:text-gray-100"
+              ? "shadow-lg scale-[1.1] "
+              : ""
           )}
         >
           {section.label}

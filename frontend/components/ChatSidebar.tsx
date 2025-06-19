@@ -26,7 +26,7 @@ export default function ChatSidebar() {
 
   return (
     <Sidebar>
-      <div className="flex flex-col h-full p-2 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+      <div className="flex flex-col h-full p-2 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 z-40">
         <Header />
         <SidebarContent className="no-scrollbar">
           <SidebarGroup>

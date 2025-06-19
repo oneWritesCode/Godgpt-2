@@ -285,7 +285,7 @@ function PureMemoizedMarkdown({
   }), [isStreaming]);
 
   return (
-    <div className="prose prose-neutral dark:prose-invert max-w-none w-full prose-code:before:content-none prose-code:after:content-none">
+    <div className="prose prose-neutral dark:prose-invert max-w-none w-full prose-code:before:content-none prose-code:after:content-none text-xs sm:text-sm md:text-base">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
