@@ -7,6 +7,7 @@ import MessageLoading from './ui/MessageLoading';
 import Error from './Error';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/frontend/dexie/db';
+import { useDexieSync } from '@/frontend/hooks/useDexieSync';
 
 function PureMessages({
   threadId,
@@ -27,6 +28,7 @@ function PureMessages({
   stop: UseChatHelpers['stop'];
   registerRef: (id: string, ref: HTMLDivElement | null) => void;
 }) {
+  useDexieSync()
   // Get messages with attachments from Dexie
   const dbMessages = useLiveQuery(
     () => db.messages.where('threadId').equals(threadId).toArray(),

@@ -4,10 +4,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getMessagesByThreadId } from '../dexie/queries';
 import { type DBMessage } from '../dexie/db';
 import { UIMessage } from 'ai';
+import { useDexieSync } from '@/frontend/hooks/useDexieSync';
 
 export default function Thread() {
   const { id } = useParams();
   if (!id) throw new Error('Thread ID is required');
+
+  useDexieSync();
 
   const messages = useLiveQuery(() => getMessagesByThreadId(id), [id]);
 

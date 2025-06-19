@@ -2,30 +2,38 @@ import { Attachment, db } from './db';
 import { UIMessage } from 'ai';
 import { v4 as uuidv4 } from 'uuid';
 import Dexie from 'dexie';
+import { syncService } from './sync';
+import { result } from 'lodash';
 
 export const getThreads = async () => {
   return await db.threads.orderBy('lastMessageAt').reverse().toArray();
 };
 
 export const createThread = async (id: string) => {
-  return await db.threads.add({
+  const thread = {
     id,
     title: 'New Chat',
     createdAt: new Date(),
     updatedAt: new Date(),
     lastMessageAt: new Date(),
-  });
+  };
+  await db.threads.add(thread);
+  syncService.broadcast({ type: 'THREAD_CREATED', data: thread });
+  return thread;
 };
 
 export const updateThread = async (id: string, title: string) => {
-  return await db.threads.update(id, {
+  const result = await db.threads.update(id, {
     title,
     updatedAt: new Date(),
   });
+  syncService.broadcast({ type: 'THREAD_UPDATED', data: { id, title } });
+  return result;
+
 };
 
 export const deleteThread = async (id: string) => {
-  return await db.transaction(
+  const result = await db.transaction(
     'rw',
     [db.threads, db.messages, db.messageSummaries],
     async () => {
@@ -34,10 +42,12 @@ export const deleteThread = async (id: string) => {
       return await db.threads.delete(id);
     }
   );
+  syncService.broadcast({ type: 'THREAD_DELETED', data: { id } });
+  return result;
 };
 
 export const deleteAllThreads = async () => {
-  return db.transaction(
+  const result =  await db.transaction(
     'rw',
     [db.threads, db.messages, db.messageSummaries],
     async () => {
@@ -46,6 +56,8 @@ export const deleteAllThreads = async () => {
       await db.messageSummaries.clear();
     }
   );
+  syncService.broadcast({ type: 'ALL_THREADS_DELETED', data: {} });
+  return result;
 };
 
 export const getMessagesByThreadId = async (threadId: string) => {
@@ -56,23 +68,31 @@ export const getMessagesByThreadId = async (threadId: string) => {
 };
 
 export const createMessage = async (threadId: string, message: UIMessage, attachments?: Attachment[]) => {
-  return await db.transaction('rw', [db.messages, db.threads], async () => {
-    await db.messages.add({
-      id: message.id,
-      threadId,
-      parts: message.parts,
-      role: message.role,
-      content: message.content,
-      createdAt: message.createdAt || new Date(),
-      attachments: attachments || [],
-    });
+  const dbMessage = {
+    id: message.id,
+    threadId,
+    parts: message.parts,
+    role: message.role,
+    content: message.content,
+    createdAt: message.createdAt || new Date(),
+    attachments: attachments || [],
+  };
 
+  await db.transaction('rw', [db.messages, db.threads], async () => {
+    await db.messages.add(dbMessage);
     await db.threads.update(threadId, {
       lastMessageAt: message.createdAt || new Date(),
     });
   });
+
+  // Broadcast to other tabs
+  syncService.broadcast({ 
+    type: 'MESSAGE_CREATED', 
+    data: { threadId, message: dbMessage } 
+  });
 };
 
+// Update deleteTrailingMessages function
 export const deleteTrailingMessages = async (
   threadId: string,
   createdAt: Date,
@@ -83,7 +103,7 @@ export const deleteTrailingMessages = async (
     : [threadId, new Date(createdAt.getTime() + 1)];
   const endKey = [threadId, Dexie.maxKey];
 
-  return await db.transaction(
+  const result = await db.transaction(
     'rw',
     [db.messages, db.messageSummaries],
     async () => {
@@ -104,6 +124,14 @@ export const deleteTrailingMessages = async (
       }
     }
   );
+
+  // Broadcast to other tabs
+  syncService.broadcast({ 
+    type: 'MESSAGES_DELETED', 
+    data: { threadId, fromDate: createdAt } 
+  });
+
+  return result;
 };
 
 export const createMessageSummary = async (

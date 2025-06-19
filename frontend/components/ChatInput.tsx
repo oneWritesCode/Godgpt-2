@@ -45,6 +45,7 @@ import UsageIndicator from "./UsageIndicator";
 import { Attachment } from "../dexie/db";
 import ImprovePromptModal from "./ImprovePromptModal";
 import { isVisionModel, supportsTools } from "@/lib/models";
+import { useDexieSync } from "@/frontend/hooks/useDexieSync";
 
 interface ChatInputProps {
   threadId: string;
@@ -174,6 +175,7 @@ function PureChatInput({
     minHeight: 72,
     maxHeight: 200,
   });
+  useDexieSync();
 
   const navigate = useNavigate();
   const { id } = useParams();

@@ -17,6 +17,9 @@ interface ChatProps {
   threadId: string;
   initialMessages: UIMessage[];
 }
+// Add import
+import { useStreamingSync } from '@/frontend/hooks/useStreamingSync';
+import { syncService } from "../dexie/sync";
 
 export default function Chat({ threadId, initialMessages }: ChatProps) {
   const { getKey } = useAPIKeyStore();
@@ -60,12 +63,29 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
         console.error(error);
       }
     },
+    onError: (error) => {
+      // Broadcast streaming error
+      if (messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.role === 'assistant') {
+          syncService.broadcastStreamingError(threadId, lastMessage.id, error.message);
+        }
+      }
+    },
     headers: {
       [modelConfig.headerKey]: getKey(modelConfig.provider) || "",
     },
     body: {
       model: selectedModel,
     },
+  });
+
+  // Add streaming sync
+  const { isReceivingStream, activeStreamMessageId } = useStreamingSync({
+    threadId,
+    messages,
+    setMessages,
+    status,
   });
 
   return (
@@ -81,7 +101,7 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
             <Messages
               threadId={threadId}
               messages={messages}
-              status={status}
+              status={isReceivingStream ? 'streaming' : status} // Show streaming if receiving from another tab
               setMessages={setMessages}
               reload={reload}
               error={error}
@@ -100,9 +120,18 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
         />
       </main>
       <ThemeToggler />
+      
+      {/* Optional: Show indicator when receiving stream from another tab */}
+      {isReceivingStream && (
+        <div className="fixed top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50">
+          Receiving response from another tab...
+        </div>
+      )}
     </div>
   );
 }
+
+
 
 const ChatSidebarTrigger = () => {
   const { state, openMobile, isMobile } = useSidebar();

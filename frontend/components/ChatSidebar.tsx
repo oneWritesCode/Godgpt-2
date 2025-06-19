@@ -17,8 +17,10 @@ import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { memo } from 'react';
 import UserProfile from './UserProfile';
+import { useDexieSync } from '@/frontend/hooks/useDexieSync';
 
 export default function ChatSidebar() {
+  useDexieSync();
   const { id } = useParams();
   const navigate = useNavigate();
   const threads = useLiveQuery(() => getThreads(), []);
