@@ -23,7 +23,6 @@ import {
 import useAutoResizeTextarea from "@/hooks/useAutoResizeTextArea";
 import { UseChatHelpers } from "@ai-sdk/react";
 import { useParams } from "react-router";
-import { useNavigate } from "react-router";
 import { createMessage, createThread } from "@/frontend/dexie/queries";
 import { useAPIKeyStore } from "@/frontend/stores/APIKeyStore";
 import { useModelStore } from "@/frontend/stores/ModelStore";
@@ -42,10 +41,12 @@ import { useMessageSummary } from "../hooks/useMessageSummary";
 import { useAuth } from "../hooks/useAuth";
 import LoginForm from "./LoginForm";
 import UsageIndicator from "./UsageIndicator";
-import { Attachment } from "../dexie/db";
+import { Attachment, db } from "../dexie/db";
 import ImprovePromptModal from "./ImprovePromptModal";
 import { isVisionModel, supportsTools } from "@/lib/models";
 import { useDexieSync } from "@/frontend/hooks/useDexieSync";
+import { useQueueProcessor } from "@/frontend/hooks/useQueue";
+import { useNavigate } from "react-router";
 
 interface ChatInputProps {
   threadId: string;
@@ -153,7 +154,7 @@ function PureChatInput({
 }: ChatInputProps) {
   const { isAuthenticated } = useAuth();
   const getKey = useAPIKeyStore((state) => state.getKey);
-  const { selectedModel } = useModelStore();
+  const { selectedModel, selectedModels, isMultiModelMode } = useModelStore();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -163,6 +164,16 @@ function PureChatInput({
   const hasImageAttachments = attachments.some((att) =>
     att.type.startsWith("image/")
   );
+  const navigate = useNavigate();
+  
+  const { startQueue, isProcessing: isQueueProcessing } = useQueueProcessor({
+    onQueueComplete: (groupId) => {
+      console.log('Queue completed:', groupId);
+    },
+    onModelComplete: (groupId, model, success) => {
+      console.log(`Model ${model} completed:`, success ? 'success' : 'failed');
+    }
+  });
 
   const modelConfig = getModelConfig(selectedModel);
   const hasUserKey = !!getKey(modelConfig.provider);
@@ -176,8 +187,6 @@ function PureChatInput({
     maxHeight: 200,
   });
   useDexieSync();
-
-  const navigate = useNavigate();
   const { id } = useParams();
 
   const isImageGenerationAvailable = useMemo(() => {
@@ -196,7 +205,8 @@ function PureChatInput({
       status === "streaming" ||
       status === "submitted" ||
       isGeneratingImage ||
-      isUploading;
+      isUploading || 
+      isQueueProcessing;
 
     // Also disable if image model is selected but not available
     const imageModelUnavailable =
@@ -209,6 +219,7 @@ function PureChatInput({
     status,
     isGeneratingImage,
     isUploading,
+    isQueueProcessing,
     selectedModel,
     isImageGenerationAvailable,
   ]);
@@ -420,9 +431,40 @@ function PureChatInput({
       status === "streaming" ||
       status === "submitted" ||
       isGeneratingImage ||
-      isUploading
+      isUploading ||
+      isQueueProcessing
     )
       return;
+
+    if (isMultiModelMode && selectedModels.length > 1) {
+  const groupId = await startQueue(
+    selectedModels, 
+    currentInput.trim(), 
+    attachments
+  );
+  
+  if (groupId) {
+    // Clear input and attachments
+    setInput("");
+    setAttachments([]);
+    adjustHeight(true);
+    
+    // Navigate to the first thread in the group instead of queue view
+    const firstThread = await db.threads
+      .where('groupId')
+      .equals(groupId)
+      // .orderBy('groupIndex')
+      .first();
+      
+    if (firstThread) {
+      navigate(`/chat/${firstThread.id}`);
+    }
+    
+    toast.success(`Processing ${selectedModels.length} models...`);
+  }
+  
+  return;
+}
 
     if (isImageModel(selectedModel) && !isImageGenerationAvailable) {
       toast.error(
@@ -505,6 +547,9 @@ function PureChatInput({
     navigate,
     formatMessageContent,
     isImageGenerationAvailable,
+    isMultiModelMode,
+    selectedModels,
+    isQueueProcessing
   ]);
 
   const handleImprovePrompt = useCallback(() => {
@@ -696,7 +741,19 @@ const ChatInput = memo(PureChatInput);
 
 const PureChatModelDropdown = () => {
   const getKey = useAPIKeyStore((state) => state.getKey);
-  const { selectedModel, setModel } = useModelStore();
+  // const { selectedModel, setModel } = useModelStore();
+  const { 
+    selectedModel, 
+    selectedModels, 
+    isMultiModelMode,
+    setMultiModelMode,
+    toggleModel,
+    selectSingleModel,
+    selectAllModels,
+    clearAllModels,
+    isModelSelected,
+    getSelectedModelsCount
+  } = useModelStore();
 
   const isModelEnabled = useCallback(
     (model: AIModel) => {
@@ -707,21 +764,19 @@ const PureChatModelDropdown = () => {
     [getKey]
   );
 
-  const getModelIcon = (model: AIModel) => {
+  const enabledModels = useMemo(() => 
+    AI_MODELS.filter(isModelEnabled), 
+    [isModelEnabled]
+  );
+
+ const getModelIcon = (model: AIModel) => {
     if (isImageModel(model)) return <ImageIcon className="w-3 h-3" />;
-    if (isVisionModel(model))
-      return (
-        <span className="text-xs">
-          {" "}
-          <Eye />{" "}
-        </span>
-      );
-    if (supportsTools(model)) return <span className="text-xs">
-      
-      <Wrench/>
-    </span>;
+    if (isVisionModel(model)) return <Eye className="w-3 h-3" />;
+    if (supportsTools(model)) return <Wrench className="w-3 h-3" />;
     return null;
   };
+
+  const selectedCount = getSelectedModelsCount();
 
   return (
     <div className="flex items-center gap-2 bg-white dark:bg-gray-900">
@@ -733,29 +788,76 @@ const PureChatModelDropdown = () => {
             className="flex items-center gap-1 h-8 pl-2 pr-2 text-xs rounded-md"
           >
             <div className="flex items-center gap-1">
-              {getModelIcon(selectedModel)}
-              {selectedModel}
-              {/* {isFreeModel(selectedModel) && (
-                <Badge className="text-xs px-1 py-0">
-                  Free
-                </Badge>
-              )} */}
-              <ChevronDown className="w-3 h-3 opacity-50" />
+              {isMultiModelMode ? (
+                <>
+                  <Badge className="text-xs px-1 py-0">
+                    {selectedCount} Models
+                  </Badge>
+                  <ChevronDown className="w-3 h-3 opacity-50" />
+                </>
+              ) : (
+                <>
+                  {getModelIcon(selectedModel)}
+                  {selectedModel}
+                  <ChevronDown className="w-3 h-3 opacity-50" />
+                </>
+              )}
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-[12rem] bg-white border-1 dark:bg-gray-900">
-          {AI_MODELS.map((model) => {
+       <DropdownMenuContent className="min-w-[16rem] bg-white border-1 dark:bg-gray-900">
+          {/* Multi-model toggle */}
+          <DropdownMenuItem
+            onSelect={() => setMultiModelMode(!isMultiModelMode)}
+            className="flex items-center justify-between gap-2 border-b"
+          >
+            <span className="font-medium">
+              {isMultiModelMode ? 'Single Model Mode' : 'Multi-Model Mode'}
+            </span>
+            <Badge>
+              {isMultiModelMode ? 'ON' : 'OFF'}
+            </Badge>
+          </DropdownMenuItem>
+
+          {/* Multi-model controls */}
+          {isMultiModelMode && (
+            <>
+              <DropdownMenuItem
+                onSelect={selectAllModels}
+                className="text-sm text-muted-foreground"
+              >
+                Select All Available
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={clearAllModels}
+                className="text-sm text-muted-foreground border-b"
+              >
+                Clear Selection
+              </DropdownMenuItem>
+            </>
+          )}
+
+          {/* Model list */}
+          {enabledModels.map((model) => {
             const isEnabled = isModelEnabled(model);
             const isFree = isFreeModel(model);
             const isImage = isImageModel(model);
             const isVision = isVisionModel(model);
             const hasTools = supportsTools(model);
+            const isSelected = isMultiModelMode ? isModelSelected(model) : selectedModel === model;
 
             return (
               <DropdownMenuItem
                 key={model}
-                onSelect={() => isEnabled && setModel(model)}
+                onSelect={() => {
+                  if (!isEnabled) return;
+                  
+                  if (isMultiModelMode) {
+                    toggleModel(model);
+                  } else {
+                    selectSingleModel(model);
+                  }
+                }}
                 disabled={!isEnabled}
                 className={cn(
                   "flex items-center justify-between gap-2",
@@ -768,6 +870,16 @@ const PureChatModelDropdown = () => {
                 )}
               >
                 <div className="flex items-center gap-2">
+                  {/* Checkbox for multi-mode, radio for single-mode */}
+                  {isMultiModelMode ? (
+                    <div className={cn(
+                      "w-4 h-4 border rounded flex items-center justify-center",
+                      isSelected && "bg-primary border-primary"
+                    )}>
+                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                    </div>
+                  ) : null}
+                  
                   {getModelIcon(model)}
                   <span>{model}</span>
                   <div className="flex gap-1">
@@ -776,12 +888,21 @@ const PureChatModelDropdown = () => {
                     {hasTools && <Badge className="text-xs">Tools</Badge>}
                   </div>
                 </div>
-                {selectedModel === model && (
+
+                {/* Single mode selection indicator */}
+                {!isMultiModelMode && selectedModel === model && (
                   <Check className="w-4 h-4 text-green-500" />
                 )}
               </DropdownMenuItem>
             );
           })}
+
+          {/* Selection summary */}
+          {isMultiModelMode && (
+            <div className="px-2 py-1 text-xs text-muted-foreground border-t">
+              {selectedCount} model{selectedCount !== 1 ? 's' : ''} selected
+            </div>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
