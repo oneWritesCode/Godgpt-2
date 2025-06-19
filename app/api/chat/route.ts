@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
     const isModelFree = isFreeModel(model as AIModel);
     
     // Check for user's API key
-    let userApiKey = headersList.get(modelConfig.headerKey) as string;
+    const userApiKey = headersList.get(modelConfig.headerKey) as string;
     
     // Get effective configuration (with fallback if needed)
     const { config: effectiveConfig, isUsingFallback } = getEffectiveModelConfig(
