@@ -1,149 +1,17 @@
-// import { useChat } from '@ai-sdk/react';
-// import Messages from './Messages';
-// import ChatInput from './ChatInput';
-// import ChatNavigator from './ChatNavigator';
-// import { UIMessage } from 'ai';
-// import { v4 as uuidv4 } from 'uuid';
-// import { createMessage } from '@/frontend/dexie/queries';
-// import { useAPIKeyStore } from '@/frontend/stores/APIKeyStore';
-// import { useModelStore } from '@/frontend/stores/ModelStore';
-// import ThemeToggler from './ui/ThemeToggler';
-// import { SidebarTrigger, useSidebar } from './ui/sidebar';
-// import { Button } from './ui/button';
-// import { MessageSquareMore } from 'lucide-react';
-// import { useChatNavigator } from '@/frontend/hooks/useChatNavigator';
-// import VirtualizedMessages from './VirtualizedMessages';
-
-
-
-// interface ChatProps {
-//   threadId: string;
-//   initialMessages: UIMessage[];
-// }
-
-// export default function Chat({ threadId, initialMessages }: ChatProps) {
-//   const { getKey } = useAPIKeyStore();
-//   const selectedModel = useModelStore((state) => state.selectedModel);
-//   const modelConfig = useModelStore((state) => state.getModelConfig());
-
-//   const {
-//     isNavigatorVisible,
-//     handleToggleNavigator,
-//     closeNavigator,
-//     registerRef,
-//     scrollToMessage,
-//   } = useChatNavigator();
-
-//   const {
-//     messages,
-//     input,
-//     status,
-//     setInput,
-//     setMessages,
-//     append,
-//     stop,
-//     reload,
-//     error,
-//   } = useChat({
-//     id: threadId,
-//     initialMessages,
-//     experimental_throttle: 100,
-//     onFinish: async ({ parts }) => {
-//       const aiMessage: UIMessage = {
-//         id: uuidv4(),
-//         parts: parts as UIMessage['parts'],
-//         role: 'assistant',
-//         content: '',
-//         createdAt: new Date(),
-//       };
-
-//       try {
-//         await createMessage(threadId, aiMessage);
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     },
-//     headers: {
-//       [modelConfig.headerKey]: getKey(modelConfig.provider) || '',
-//     },
-//     body: {
-//       model: selectedModel,
-//     },
-//   });
-
-//   return (
-//     <div className="relative w-full h-screen flex flex-col">
-//       <ChatSidebarTrigger />
-//       <main
-//         className={`flex flex-col w-full max-w-3xl pt-10 pb-44 mx-auto transition-all duration-300 ease-in-out`}
-//       >
-//         <VirtualizedMessages
-//           threadId={threadId}
-//           messages={messages}
-//           status={status}
-//           setMessages={setMessages}
-//           reload={reload}
-//           error={error}
-//           registerRef={registerRef}
-//           stop={stop}
-//         />
-//         <ChatInput
-//           threadId={threadId}
-//           input={input}
-//           status={status}
-//           append={append}
-//           setInput={setInput}
-//           stop={stop}
-//         />
-//       </main>
-//       <ThemeToggler />
-//       <Button
-//         onClick={handleToggleNavigator}
-//         variant="outline"
-//         size="icon"
-//         className="fixed right-16 top-4 z-20"
-//         aria-label={
-//           isNavigatorVisible
-//             ? 'Hide message navigator'
-//             : 'Show message navigator'
-//         }
-//       >
-//         <MessageSquareMore className="h-5 w-5" />
-//       </Button>
-
-//       <ChatNavigator
-//         threadId={threadId}
-//         scrollToMessage={scrollToMessage}
-//         isVisible={isNavigatorVisible}
-//         onClose={closeNavigator}
-//       />
-//     </div>
-//   );
-// }
-
-// const ChatSidebarTrigger = () => {
-//   const { state } = useSidebar();
-//   if (state === 'collapsed') {
-//     return <SidebarTrigger className="fixed left-4 top-4 z-100" />;
-//   }
-//   return null;
-// };
-
-
-import { useChat } from '@ai-sdk/react';
-import ChatInput from './ChatInput';
-import { UIMessage } from 'ai';
-import { v4 as uuidv4 } from 'uuid';
-import { createMessage } from '@/frontend/dexie/queries';
-import { useAPIKeyStore } from '@/frontend/stores/APIKeyStore';
-import { useModelStore } from '@/frontend/stores/ModelStore';
-import ThemeToggler from './ui/ThemeToggler';
-import { SidebarTrigger, useSidebar } from './ui/sidebar';
-import { Button } from './ui/button';
-import { MessageSquareMore } from 'lucide-react';
-import { useChatNavigator } from '@/frontend/hooks/useChatNavigator';
-import Messages from './Messages';
-import LandingChatPage from './LandingChatPage';
+import { useChat } from "@ai-sdk/react";
+import ChatInput from "./ChatInput";
+import { UIMessage } from "ai";
+import { v4 as uuidv4 } from "uuid";
+import { createMessage } from "@/frontend/dexie/queries";
+import { useAPIKeyStore } from "@/frontend/stores/APIKeyStore";
+import { useModelStore } from "@/frontend/stores/ModelStore";
+import ThemeToggler from "./ui/ThemeToggler";
+import { SidebarTrigger, useSidebar } from "./ui/sidebar";
+import { Button } from "./ui/button";
+import { MessageSquareMore } from "lucide-react";
+import { useChatNavigator } from "@/frontend/hooks/useChatNavigator";
+import Messages from "./Messages";
+import LandingChatPage from "./LandingChatPage";
 
 interface ChatProps {
   threadId: string;
@@ -180,9 +48,9 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
     onFinish: async ({ parts }) => {
       const aiMessage: UIMessage = {
         id: uuidv4(),
-        parts: parts as UIMessage['parts'],
-        role: 'assistant',
-        content: '',
+        parts: parts as UIMessage["parts"],
+        role: "assistant",
+        content: "",
         createdAt: new Date(),
       };
 
@@ -193,7 +61,7 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
       }
     },
     headers: {
-      [modelConfig.headerKey]: getKey(modelConfig.provider) || '',
+      [modelConfig.headerKey]: getKey(modelConfig.provider) || "",
     },
     body: {
       model: selectedModel,
@@ -201,28 +69,27 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
   });
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800">
+    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 lg:p-0 p-2 ">
       <ChatSidebarTrigger />
       <main
-  className={`flex flex-col w-full max-w-3xl pt-10 pb-44 lg:mx-auto transition-all duration-300 ease-in-out`}
-
+        className={`flex flex-col w-full max-w-3xl pt-12 text-xs sm:text-sm md:text-base pb-44 mx-auto transition-all duration-300 ease-in-out z-100`}
       >
-      
-        {messages.length === 0 ? (
-          <LandingChatPage/>
-        ) : (
-          <Messages
-            threadId={threadId}
-            messages={messages}
-            status={status}
-            setMessages={setMessages}
-            reload={reload}
-            error={error}
-            registerRef={registerRef}
-            stop={stop}
+        <div className="sm:translate-x-3 sm:px-4 px-2">
+          {messages.length === 0 ? (
+            <LandingChatPage />
+          ) : (
+            <Messages
+              threadId={threadId}
+              messages={messages}
+              status={status}
+              setMessages={setMessages}
+              reload={reload}
+              error={error}
+              registerRef={registerRef}
+              stop={stop}
             />
           )}
-        
+        </div>
         <ChatInput
           threadId={threadId}
           input={input}
@@ -238,9 +105,10 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
 }
 
 const ChatSidebarTrigger = () => {
-  const { state } = useSidebar();
-  if (state === 'collapsed') {
-    return <SidebarTrigger className="fixed left-4 top-4 z-50" />;
-  }
-  return null;
+  const { state, openMobile, isMobile } = useSidebar();
+  // Hide the trigger only when the sidebar is open for the current device type
+  if ((isMobile && openMobile) || (!isMobile && state === 'expanded')) return null;
+  return (
+    <SidebarTrigger className="fixed left-4 top-4 z-50 block" />
+  );
 };
