@@ -68,7 +68,7 @@ const Index: React.FC<UserDashboardProps> = ({ chatId }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-[var(--bg-dark)] dark:via-[var(--bg-dark)] dark:to-[var(--bg-dark)]">
       <div className="w-full max-w-4xl mx-auto min-h-screen p-6">
         {/* Header Section */}
         <div className="mb-8">

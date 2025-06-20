@@ -89,7 +89,7 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
   });
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 lg:p-0 p-2 ">
+    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-[var(--bg)] dark:via-[var(--bg)] dark:to-[var(--bg)] lg:p-0 p-2 ">
       <ChatSidebarTrigger />
       <main
         className={`flex flex-col w-full max-w-3xl pt-12 text-xs sm:text-sm md:text-base pb-44 mx-auto transition-all duration-300 ease-in-out z-100`}
