@@ -81,7 +81,7 @@ const ThreadGroup = memo(({
       {/* Group Header */}
       <div className="flex items-center justify-between group/group">
         <div 
-          className="flex items-center gap-2 flex-1 cursor-pointer p-2 rounded-md hover:bg-white/50 dark:hover:bg-gray-800/50"
+          className="flex items-center gap-2 flex-1 cursor-pointer p-2 rounded-md hover:bg-white/50 dark:hover:bg-[var(--bg)]/50"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {threads.length > 1 ? (
@@ -114,8 +114,8 @@ const ThreadGroup = memo(({
               key={thread.id}
               className={cn(
                 'cursor-pointer group/thread flex items-center justify-between px-3 py-2 rounded-md text-sm',
-                'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                currentThreadId === thread.id && 'bg-white/50 dark:bg-gray-800/50'
+                'hover:bg-white/50 dark:hover:bg-[var(--bg)]/50',
+                currentThreadId === thread.id && 'bg-white/50 dark:bg-[var(--bg)]/50'
               )}
               onClick={() => onNavigate(thread.id)}
             >
@@ -191,8 +191,8 @@ export default function ChatSidebar() {
                   <SidebarMenuItem key={thread.id}>
                     <div
                       className={cn(
-                        'cursor-pointer group/thread h-9 flex items-center px-2 py-1 rounded-[8px] overflow-hidden w-full hover:bg-white/50 dark:hover:bg-gray-800/50',
-                        id === thread.id && 'bg-white/50 dark:bg-gray-800/50'
+                        'cursor-pointer group/thread h-9 flex items-center px-2 py-1 rounded-[8px] overflow-hidden w-full hover:bg-white/50 dark:hover:bg-[var(--bg)]/50',
+                        id === thread.id && 'bg-white/50 dark:bg-[var(--bg)]/50'
                       )}
                       onClick={() => handleNavigate(thread.id)}
                     >

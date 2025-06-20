@@ -48,7 +48,7 @@ export default function ProfileSection() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-4">
+    <div className="bg-white dark:bg-[var(--bg)] rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-4">
       <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Profile Information</h3>
       <div className="grid gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

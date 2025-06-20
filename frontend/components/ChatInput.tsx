@@ -601,7 +601,7 @@ function PureChatInput({
     <>
       <div className="fixed bottom-2 lg:left-auto left-0 w-full px-3 pb-0 ;g:pb-3">
         <div className="max-w-3xl lg:mx-0 mx-auto">
-          <div className="rounded-[16px] bg-white border dark:bg-gray-900 p-0.5 w-full">
+          <div className="rounded-[16px] bg-white border dark:bg-[var(--bg-dark)] p-0.5 w-full">
             <div className="relative">
               <div className="flex flex-col">
                 {/* Attachments Preview */}
@@ -780,7 +780,7 @@ const PureChatModelDropdown = () => {
   const selectedCount = getSelectedModelsCount();
 
   return (
-    <div className="flex items-center gap-2 bg-white dark:bg-gray-900">
+    <div className="flex items-center gap-2 bg-white dark:bg-[var(--bg-dark)]">
       <UsageIndicator />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -806,7 +806,7 @@ const PureChatModelDropdown = () => {
             </div>
           </Button>
         </DropdownMenuTrigger>
-       <DropdownMenuContent className="min-w-[16rem] bg-white border-1 dark:bg-gray-900">
+       <DropdownMenuContent className="min-w-[16rem] bg-white border-1 dark:bg-[var(--bg-dark)] ">
           {/* Multi-model toggle */}
           <DropdownMenuItem
             onSelect={() => setMultiModelMode(!isMultiModelMode)}
@@ -874,19 +874,21 @@ const PureChatModelDropdown = () => {
                   {/* Checkbox for multi-mode, radio for single-mode */}
                   {isMultiModelMode ? (
                     <div className={cn(
-                      "w-4 h-4 border rounded flex items-center justify-center",
+                      "w-4 h-4 rounded flex items-center justify-center border-1 border-black/20 dark:border-white/20",
                       isSelected && "bg-primary border-primary"
                     )}>
-                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                      {isSelected && <Check className="w-3 h-3 text-primary-foreground " />}
                     </div>
                   ) : null}
                   
                   {getModelIcon(model)}
                   <span>{model}</span>
                   <div className="flex gap-1">
-                    {isFree && <Star className="w-3 h-3 text-pink-400" />}
-                    {isVision && <Eye className="w-3 h-3 text-blue-400" />}
-                    {hasTools && <Wrench className="w-3 h-3 text-yellow-500" />}
+                    {isFree && <Star className="w-3 h-3 text-gray-400" />}
+                    {/* Only show Eye if not already shown by getModelIcon */}
+                    {isVision && getModelIcon(model)?.type !== Eye && <Eye className="w-3 h-3 text-gray-400" />}
+                    {/* Only show Wrench if not already shown by getModelIcon */}
+                    {hasTools && getModelIcon(model)?.type !== Wrench && <Wrench className="w-3 h-3 text-gray-500" />}
                   </div>
                 </div>
 

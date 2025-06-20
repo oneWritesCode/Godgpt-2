@@ -51,7 +51,7 @@ export default function PreferencesSection() {
 
   return (
     <div 
-      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-4"
+      className="bg-white dark:bg-[var(--bg)] rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-4"
       onKeyDown={(e) => handleKeyPress(e, () => {
         // Handle any global Enter key actions if needed
       })}

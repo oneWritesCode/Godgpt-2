@@ -24,7 +24,7 @@ const MessageUsage: React.FC<MessageUsageProps> = ({
 }) => {
   // You can use chatId here to fetch specific usage data if needed
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+    <div className="bg-white dark:bg-[var(--bg)] rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
       <h3 className="font-medium text-gray-800 dark:text-gray-100 mb-4">Message Usage</h3>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Resets {resetDate}</p>
       

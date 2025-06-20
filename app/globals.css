@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+  @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 @plugin 'tailwind-scrollbar';
@@ -54,6 +54,9 @@
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
     0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  --bg-dark: #1a202c;
+  --bg: #1E2939;
+  --purple: #f3e8ff;
 }
 
 .dark {
