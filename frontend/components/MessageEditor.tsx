@@ -110,7 +110,7 @@ export default function MessageEditor({
       <Textarea
         value={draftContent}
         onChange={(e) => setDraftContent(e.target.value)}
-        className="resize-none w-full min-w-[300px]"
+        className="resize-none w-full min-w-[200px] border-2 outline-none"
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();

@@ -48,7 +48,7 @@ export default function ProfileSection() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-4">
+    <div className="bg-white dark:bg-[var(--bg)] rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-4">
       <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Profile Information</h3>
       <div className="grid gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -58,7 +58,7 @@ export default function ProfileSection() {
               value={profileData.name}
               onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
               onKeyDown={handleKeyPress}
-              className="w-full sm:w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              className="w-full sm:w-48 dark:bg-[var(--bg-dark)] dark:border-gray-600 dark:text-gray-100"
             />
             {errors.name && (
               <span className="text-xs text-red-500 dark:text-red-400">{errors.name}</span>
@@ -72,7 +72,7 @@ export default function ProfileSection() {
               value={profileData.email}
               onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
               onKeyDown={handleKeyPress}
-              className="w-full sm:w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              className="w-full sm:w-48 dark:bg-[var(--bg-dark)] dark:border-gray-600 dark:text-gray-100"
             />
             {errors.email && (
               <span className="text-xs text-red-500 dark:text-red-400">{errors.email}</span>

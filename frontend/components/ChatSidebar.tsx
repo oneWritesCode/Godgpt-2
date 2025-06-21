@@ -81,7 +81,7 @@ const ThreadGroup = memo(({
       {/* Group Header */}
       <div className="flex items-center justify-between group/group">
         <div 
-          className="flex items-center gap-2 flex-1 cursor-pointer p-2 rounded-md hover:bg-white/50 dark:hover:bg-gray-800/50"
+          className="flex items-center gap-2 flex-1 cursor-pointer p-2 rounded-md hover:bg-white/50 dark:hover:bg-[var(--bg)]/50"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {threads.length > 1 ? (
@@ -114,8 +114,8 @@ const ThreadGroup = memo(({
               key={thread.id}
               className={cn(
                 'cursor-pointer group/thread flex items-center justify-between px-3 py-2 rounded-md text-sm',
-                'hover:bg-white/50 dark:hover:bg-gray-800/50',
-                currentThreadId === thread.id && 'bg-white/50 dark:bg-gray-800/50'
+                'hover:bg-white/50 dark:hover:bg-[var(--bg)]/50',
+                currentThreadId === thread.id && 'bg-white/50 dark:bg-[var(--bg)]/50'
               )}
               onClick={() => onNavigate(thread.id)}
             >
@@ -167,7 +167,7 @@ export default function ChatSidebar() {
 
   return (
     <Sidebar>
-      <div className="flex flex-col h-full p-2 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 z-40">
+      <div className="flex flex-col h-full p-2 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-[var(--bg-dark)] dark:via-[var(--bg-dark)] dark:to-[var(--bg-dark)] z-40">
         <Header />
         <SidebarContent className="no-scrollbar">
           <SidebarGroup>
@@ -191,8 +191,8 @@ export default function ChatSidebar() {
                   <SidebarMenuItem key={thread.id}>
                     <div
                       className={cn(
-                        'cursor-pointer group/thread h-9 flex items-center px-2 py-1 rounded-[8px] overflow-hidden w-full hover:bg-white/50 dark:hover:bg-gray-800/50',
-                        id === thread.id && 'bg-white/50 dark:bg-gray-800/50'
+                        'cursor-pointer group/thread h-9 flex items-center px-2 py-1 rounded-[8px] overflow-hidden w-full hover:bg-white/50 dark:hover:bg-[var(--bg)]/50',
+                        id === thread.id && 'bg-white/50 dark:bg-[var(--bg)]/50'
                       )}
                       onClick={() => handleNavigate(thread.id)}
                     >

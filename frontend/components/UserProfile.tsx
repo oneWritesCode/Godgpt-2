@@ -46,7 +46,7 @@ export default function UserProfile() {
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[var(--bg)] border border-gray-200 dark:border-gray-700">
         <DropdownMenuItem asChild>
           <Link
             to={{

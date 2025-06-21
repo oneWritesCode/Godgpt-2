@@ -20,7 +20,7 @@ export default function DashboardNav({ onSectionChange, currentSection }: Dashbo
   ];
 
   return (
-    <nav className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm bg-pink-500/10 p-2 rounded-sm dark:bg-gray-800">
+    <nav className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm bg-pink-500/10 p-2 rounded-sm dark:bg-[var(--bg)]">
       {sections.map((section) => (
         <button
           key={section.id}

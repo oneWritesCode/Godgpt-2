@@ -10,6 +10,8 @@ import PreferencesSection from "./sections/PreferencesSection";
 import ProfileSection from "./sections/ProfileSection";
 import { useNavigate } from "react-router";
 import APIKeyForm from "../APIKeyForm";
+import ModelsSection from "./sections/ModelsSection";
+import ContactSection from "./sections/ContactSection";
 
 interface UserDashboardProps {
   chatId?: string | null;
@@ -34,7 +36,7 @@ const Index: React.FC<UserDashboardProps> = ({ chatId }) => {
         return <PreferencesSection />;
       case 'history':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <div className="bg-white dark:bg-[var(--bg)] rounded-lg p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">History & Sync</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Your chat history and synchronization settings will appear here.
@@ -43,18 +45,13 @@ const Index: React.FC<UserDashboardProps> = ({ chatId }) => {
         );
       case 'models':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Models</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Configure your AI model preferences here.
-            </p>
-          </div>
+          <ModelsSection/>
         );
       case 'api-keys':
         return <APIKeyForm />;
       case 'attachments':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <div className="bg-white dark:bg-[var(--bg)] rounded-lg p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Attachments</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               View and manage your file attachments here.
@@ -63,12 +60,7 @@ const Index: React.FC<UserDashboardProps> = ({ chatId }) => {
         );
       case 'contact':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contact Us</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Get in touch with our support team.
-            </p>
-          </div>
+       <ContactSection/>
         );
       default:
         return null;
@@ -76,7 +68,7 @@ const Index: React.FC<UserDashboardProps> = ({ chatId }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-[var(--bg-dark)] dark:via-[var(--bg-dark)] dark:to-[var(--bg-dark)]">
       <div className="w-full max-w-4xl mx-auto min-h-screen p-6">
         {/* Header Section */}
         <div className="mb-8">
@@ -100,9 +92,11 @@ const Index: React.FC<UserDashboardProps> = ({ chatId }) => {
         </div>
 
         {/* Message Usage Section */}
-        <div className="mt-auto">
-          <MessageUsage chatId={chatId} />
-        </div>
+        {currentSection === 'account' && (
+          <div className="mt-auto">
+            <MessageUsage chatId={chatId} />
+          </div>
+        )}
       </div>
     </div>
   );
